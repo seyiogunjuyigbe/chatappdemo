@@ -4,6 +4,7 @@ const socket = io(baseUrl);
 const chatMessages = document.querySelector('.chat-messages');
 let token;
 var currentUser;
+var currentRoom;
 let auth = document.cookie.split("=");
 if (auth[0] === "token") {
     token = auth[1];
@@ -11,6 +12,10 @@ if (auth[0] === "token") {
 }
 if (!token) {
     window.location.href = window.location.origin + "/auth/login"
+}
+if (!currentRoom) {
+    chatMessages.style.display = "block"
+
 }
 socket.on('current-user', user => {
     currentUser = user
@@ -53,11 +58,16 @@ document.querySelectorAll('.online-users').forEach(user => {
     })
 })
 function renderMessage(msg) {
+    chatMessages.style.display = "block"
+
     let { text, username, time } = msg
     const div = document.createElement('div');
     div.classList.add('message');
-    div.innerHTML = ` <p class="meta">${username} <span>${time}</span></p>
+    if (text) {
+        div.innerHTML = ` <p class="meta">${username} <span>${time}</span></p>
           <p class="text">${text}</p>`;
+    }
+
     chatMessages.appendChild(div)
 }
 
@@ -80,6 +90,8 @@ function openRoom(usernames = []) {
     socket.emit('room-request', usernames)
 }
 function renderRoomMessages(messages = []) {
+    chatMessages.style.display = "block"
+
     chatMessages.innerHTML = "";
     messages.forEach(message => {
         renderMessage(message)

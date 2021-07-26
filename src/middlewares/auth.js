@@ -1,4 +1,4 @@
-const getJWT = require('../services/jwtService');
+const getJWT = require('../services/jwt.service');
 const User = require('../models/user');
 const response = require('./response');
 
@@ -12,34 +12,30 @@ module.exports = (req, res, next) => {
                 const token = credentials;
                 getJWT.decodeToken(token, async (err, decoded) => {
                     if (err) {
-                        return response(res, 400, err.message);
+                        return res.redirect("/auth/login");
                     }
                     try {
                         req.user = await User.findById(decoded.id);
                         if (!req.user) {
-                            return response(res, 401, 'invalid token');
+                            return res.redirect("/auth/login");
                         }
                         next();
                     } catch (error) {
-                        return response(res, 401, error.message);
+                        return res.redirect("/auth/login");
+
                     }
                 });
             } else {
-                return response(
-                    res,
-                    401,
-                    'An error occured. Please log in again'
-                );
+                return res.redirect("/auth/login");
+
             }
         } else {
-            return response(
-                res,
-                401,
-                'An error occured. Please log in again'
-            );
+            return res.redirect("/auth/login");
+
         }
     } else {
-        return response(res, 401, 'You need to be logged in to continue');
+        return res.redirect("/auth/login");
+
     }
 
 };

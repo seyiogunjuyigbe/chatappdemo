@@ -30,7 +30,8 @@ router.post(
 );
 router.get('/verify-email/:token', Auth.verify);
 router.get('/verify-token/resend', Auth.resendToken);
-router.get('/password/recover', Auth.recover);
+router.get('/password/recover', Auth.renderRecoveryPage);
+router.post('/password/recover', Auth.recover);
 router.post(
     '/password/reset/:token',
     [
@@ -43,8 +44,9 @@ router.post(
             (value, { req }) => value === req.body.password
         ),
     ],
-    validate,
+    validate("reset"),
     Auth.resetPassword
 );
-
+router.get(
+    '/password/reset/:token', Auth.renderResetPage)
 module.exports = router;

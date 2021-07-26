@@ -63,7 +63,7 @@ module.exports = {
                                     </p>
       `;
             await sendMail(subject, email, body, link, 'Verify your Account');
-            return response(res, 200, 'redirect', { to: "/chat", data: { token, user: newUser } });
+            return response(res, 200, 'redirect', { to: "/", data: { token, user: newUser } });
 
         } catch (error) {
             return next(error);
@@ -88,7 +88,7 @@ module.exports = {
                 email,
                 username
             });
-            return response(res, 200, 'redirect', { to: "/chat", data: { token, user } });
+            return response(res, 200, 'redirect', { to: "/", data: { token, user } });
         } catch (err) {
             next(err);
         }
@@ -184,15 +184,22 @@ module.exports = {
             next(err);
         }
     },
+    async renderRecoveryPage(req, res, next) {
+        try {
+            return response(res, 200, "recover", { err: null })
+        } catch (error) {
+            next(error)
+        }
+    },
     async recover(req, res, next) {
         try {
-            const { email } = req.query;
+            const { email } = req.body;
             const user = await User.findOne({ email });
             if (!user)
                 return response(
                     res,
-                    401,
-                    `The email address ${email} is not associated with any account.`
+                    401, "recover",
+                    { err: `The email address ${email} is not associated with any account.` }
                 );
             await Token.updateMany(
                 { user: user._id, type: 'password-reset', expired: false },
@@ -204,13 +211,13 @@ module.exports = {
                 user,
                 type: 'password-reset',
             });
-            let link = `${SITE_URL}/reset/${token.token}`;
+            let link = `${SITE_URL}/auth/password/reset/${token.token}`;
             console.log({ link });
             let subject = 'Reset Password';
             let message = `Please click on the link to reset your password.`;
             await sendMail(
                 subject,
-                user.email,
+                email,
                 message,
                 link,
                 'Reset Password'
@@ -218,11 +225,19 @@ module.exports = {
             return response(
                 res,
                 200,
-                `A reset email has been sent to ${user.email}`,
-                link
+                "recover-success",
+                { message: `A reset email has been sent to ${user.email}`, email },
+
             );
         } catch (err) {
             next(err);
+        }
+    },
+    async renderResetPage(req, res, next) {
+        try {
+            return response(res, 200, "reset", { err: null, token: req.params.token })
+        } catch (error) {
+            next(error)
         }
     },
     async resetPassword(req, res, next) {
@@ -237,8 +252,6 @@ module.exports = {
                     400,
                     'We were unable to find a valid code. Your token my have expired.'
                 );
-            console.log(token.user);
-
             if (
                 token.expired ||
                 moment.utc(token.expiresIn).diff(moment.utc(), 'minutes') < 0
@@ -267,7 +280,7 @@ module.exports = {
             let subject = 'Your password has been changed';
             let text = `This is a confirmation that the password for your account ${user.email} has just been changed.\n`;
             await sendMail(subject, user.email, text);
-            return response(res, 200, 'Your password has been updated.', user.role);
+            return res.redirect('/auth/login');
         } catch (err) {
             next(err);
         }
