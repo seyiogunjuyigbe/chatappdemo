@@ -25,8 +25,10 @@ app.use(routes)
 app.use(errorHandler);
 
 io.on('connection', socket => {
+    let onlineUsers = [];
     // todo: add user to list of online users
     console.log("new user connected");
+
     // Welcome current user
     socket.emit('message', 'Welcome');
     // broadcasr when user connects
@@ -99,11 +101,18 @@ io.on('connection', socket => {
             let parsedMessages = messages.map(m => {
                 return { text: m.text, username: m.sender.username, time: moment.utc(m.createdAt).format("hh:mm") }
             })
-            socket.emit('room-entered', parsedMessages)
+            socket.emit('room-entered', { room, messages: parsedMessages })
 
         } catch (error) {
             console.log(error)
         }
+    })
+    socket.on("joined", username => {
+        onlineUsers.push(username);
+        onlineUsers = onlineUsers.filter((value, index, self) => {
+            return self.indexOf(value) === index;
+        });
+        socket.emit("online-users", onlineUsers)
     })
     socket.on('disconnect', () => {
         // socket.emit('user-left', "A user has left the chat")
