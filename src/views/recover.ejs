@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recover Password</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/auth.css">
+
+</head>
+
+<body>
+    <div class="container" id="formDiv">
+        <img src="/images/logo.png" alt="" id="logo">
+        <h2>Forgot Password?</h2>
+        <form action="/admin/auth/password/recover" method="post">
+            <div class="form-group">
+                <label for="">Recovery Email Address</label>
+                <input type="email" class="form-control" name="email" id="" required>
+            </div>
+            <% if(!err){ %>
+                <p class="text-primary">
+                    Please enter a correct email address, a magic link to reset your password will be sent there
+                </p>
+                <% } else{ %>
+                    <p class="text-warning">
+                        <%=err%>
+                    </p>
+                    <% } %>
+
+                        <div class="form-group">
+                            <input type="submit" class="form-control btn btn-primary" value="SEND RECOVERY MAIL" id="">
+                        </div>
+        </form>
+        <p id="recover">
+            Remember Password? <a href="/admin/auth/login">Login</a>
+        </p>
+
+        <hr>
+        <p id="foot">Chataway</p>
+
+    </div>

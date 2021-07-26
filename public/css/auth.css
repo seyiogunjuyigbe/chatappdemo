@@ -1,0 +1,136 @@
+#formDiv{
+    width:40%;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    border-radius: 40px;
+    padding: 3%;
+    padding-top: 0;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    
+}
+form{
+    padding-top: 2%;
+}
+body{
+    background-color: #070113;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+}
+#logo{
+    margin-left: 40%;
+    width: 80px;
+}
+
+#formDiv h2{
+    margin-top: 0.5em;
+    text-align: center;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+#recover{
+    font-style: italic;
+    font-size: small;
+    text-align: center !important;
+    margin-top: 3em;
+
+}
+hr{
+    height: 1.5px;
+    background-color: #fff;
+    margin-top: 3em;
+}
+#foot{
+    font-size: 1em;
+    text-align: center;
+}
+p.text-primary, .text-warning{
+    text-align: center;
+    font-size: smaller;
+    margin-top: 3em;
+}
+p.text-success{
+    overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  text-align: center;
+  font-size: 0.95em;
+  width:100%,
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 660px) {
+    #formDiv{
+        width:80%;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        border-radius: 30px;
+        padding: 3%;
+        padding-top: 0;
+        margin-top: 1%;
+        margin-bottom: 1%;
+        
+    }
+    #logo{
+        margin-left: 40%;
+        width: 80px;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (max-width: 680px) {
+    #formDiv{
+        width:80%;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        border-radius: 30px;
+        padding: 3%;
+        padding-top: 0;
+        margin-top: 1%;
+        margin-bottom: 1%;
+        
+    }
+    #logo{
+        margin-left: 40%;
+        width: 80px;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (max-width: 720px) {
+    #formDiv{
+        width:80%;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        border-radius: 30px;
+        padding: 3%;
+        padding-top: 0;
+        margin-top: 1%;
+        margin-bottom: 1%;
+        
+    }
+}
+
+/* @media only screen and (max-width: 820px) {
+    #formDiv{
+        width:60%;
+        border: 2px solid #fff;
+        box-sizing: border-box;
+        border-radius: 30px;
+        padding: 3%;
+        padding-top: 0;
+        margin-top: 1%;
+        margin-bottom: 1%;
+        
+    }
+} */
+
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    
+}

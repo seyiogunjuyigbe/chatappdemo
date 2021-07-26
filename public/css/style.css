@@ -187,3 +187,10 @@ a {
 		display: none;
 	}
 }
+.disabled{
+	color: grey;
+	font-style: italic;
+}
+.online-user{
+	cursor: pointer;
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/b2d9357a8e.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+</head>
+
+<body>
+    <div class="container" id="formDiv">
+        <img src="/images/logo.png" alt="" id="logo">
+
+        <h2>Something went wrong</h2>
+        <%if(err){ %>
+            <p class="text-warning">
+                <%=err%>
+            </p>
+            <% } %>
+                <div id="nav">
+                    <center>
+                        <a class="btn btn-primary" href="/" title="Home"><i class="fas fa-2x fa-home"></i></a>
+                        <button class="btn btn-primary" title="Back" onclick="window.history.go(-1); return false;"><i
+                                class="fas fa-2x fa-angle-double-left"></i></i></button>
+                    </center>
+
+                </div>
+
+                <hr>
+                <p id="foot">Chataway</p>
+
+    </div>

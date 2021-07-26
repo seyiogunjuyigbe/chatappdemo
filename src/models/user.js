@@ -59,32 +59,5 @@ userSchema.pre('save', function preSave(next) {
     });
 });
 
-userSchema.methods.generateJWT = function () {
-    let payload = {
-        id: this._id,
-        email: this.email,
-        username: this.username,
-        firstName: this.firstName,
-        lastName: this.lastName,
-    };
 
-    return jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: Number(process.env.TOKEN_EXPIRY)
-    });
-}
-
-userSchema.methods.generatePasswordReset = function () {
-    this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
-    this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
-};
-
-UserSchema.methods.generateToken = function () {
-    let payload = {
-        userId: this._id,
-        token: crypto.randomBytes(20).toString('hex'),
-
-    };
-
-    return new Token(payload);
-};
 module.exports = mongoose.model('User', userSchema);
