@@ -5,9 +5,7 @@ const chatMessages = document.querySelector('.chat-messages');
 let token = checkAuth()
 socket.emit("send-token", token)
 const room = window.location.href.replace(window.location.origin + "/chat/", "");
-if (room && room.match(/^[a-f\d]{24}$/i)) {
-    socket.emit("room-request", { user: currentUser, room })
-}
+
 var currentUser;
 var currentRoom;
 
@@ -19,6 +17,9 @@ if (!currentRoom) {
 socket.on('current-user', user => {
     currentUser = user
 })
+if (room && room.match(/^[a-f\d]{24}$/i)) {
+    socket.emit("room-request", { user: currentUser, room })
+}
 socket.on('message', message => {
     renderMessage(message);
     chatMessages.scrollTop = chatMessages.scrollHeight

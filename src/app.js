@@ -49,7 +49,7 @@ io.on('connection', socket => {
             }
             io.to(room).emit('message', Utils.formatMessage(user.username, msg.data.text));
         } catch (err) {
-            socket.emit("no-auth")
+            // socket.emit("no-auth")
             console.log(err)
         }
     })
