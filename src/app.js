@@ -25,43 +25,29 @@ app.use(routes)
 app.use(errorHandler);
 
 io.on('connection', socket => {
-    let onlineUsers = [];
-    // todo: add user to list of online users
-    console.log("new user connected");
-
     // Welcome current user
     socket.emit('message', 'Welcome');
     // broadcasr when user connects
     socket.broadcast.emit('message', "A user has just joined the chat");
     socket.on('chat-message', async (payload) => {
         try {
-            const { message, token, recipientUsername } = payload;
-            let userData = await Utils.getUserFromToken(token);
+            const { message, room } = payload;
+            let userData = await Utils.get({ socketId: socket.id });
             if (!userData.data) {
                 throw new Error("User not found")
             }
             let user = userData.data
-            let recipientData = await Utils.get('user', { username: recipientUsername });
-            // if (!recipientData.data) {
-            //     throw new Error("recipient not found")
-            // }
-            let recipient = recipientData.data;
-            let room = await Utils.get("room", { $and: [{ users: user._id }] });
-            if (!room.data) {
-                room = await Utils.createDoc("room", { users: [user._id] })
-            }
             let newMsg = {
                 sender: user._id,
-                recipient: recipient ? recipient._id : null,
                 text: message,
-                room: room.data._id
+                room
             }
             let msg = await Utils.createDoc("message", newMsg);
             if (!msg.data) {
                 throw new Error("An error occured sending your message")
 
             }
-            socket.emit('message', Utils.formatMessage(user.username, msg.data.text))
+            io.to(room).emit('message', Utils.formatMessage(user.username, msg.data.text));
         } catch (err) {
             socket.emit("no-auth")
             console.log(err)
@@ -75,7 +61,9 @@ io.on('connection', socket => {
                 socket.emit("no-auth")
             }
             socket.emit('current-user', user.data)
-            socket.emit('new-user', user.data.username)
+            let users = await Utils.appendUser(socket.id, user.data);
+            console.log(true)
+            socket.emit('new-user', users)
         } catch (error) {
             console.log(error)
             socket.emit("no-auth")
@@ -84,36 +72,25 @@ io.on('connection', socket => {
 
 
     })
-    socket.on('room-request', async (usernames = []) => {
+    socket.on('room-request', async (user, room) => {
         try {
-            let userQuery = await Promise.all(usernames.map(async u => {
-                let user = await Utils.get('user', { username: u });
-                if (user) {
-                    return { user: user._id }
-                }
-            }));
-            let room = await Utils.get('room', { $and: userQuery });
-            if (!room) {
-                let users = userQuery.map(user => user.user)
-                room = await Utils.createDoc('room', users)
-            }
+            await Utils.appendUser(socket.id, user);
+            socket.join(room._id)
             let messages = await Utils.get("message", { room: room._id }, true, "sender");
-            let parsedMessages = messages.map(m => {
+            let parsedMessages = messages.data ? messages.data.map(m => {
                 return { text: m.text, username: m.sender.username, time: moment.utc(m.createdAt).format("hh:mm") }
+            }) : []
+            io.to(room._id).emit('online-users', {
+                users,
+                room, messages: parsedMessages
             })
-            socket.emit('room-entered', { room, messages: parsedMessages })
+            // socket.emit('room-entered', { room, messages: parsedMessages })
 
         } catch (error) {
             console.log(error)
         }
     })
-    socket.on("joined", username => {
-        onlineUsers.push(username);
-        onlineUsers = onlineUsers.filter((value, index, self) => {
-            return self.indexOf(value) === index;
-        });
-        socket.emit("online-users", onlineUsers)
-    })
+
     socket.on('disconnect', () => {
         // socket.emit('user-left', "A user has left the chat")
     })

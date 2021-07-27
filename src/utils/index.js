@@ -3,7 +3,8 @@ const Models = require("require-all")(path.resolve(__dirname, "../models"));
 const createError = require('http-errors');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const moment = require('moment')
+const moment = require('moment');
+const users = []
 exports.createDoc = async (model, payload) => {
     if (!Object.keys(Models).includes(model)) {
         return { success: false, error: "Invalid model selected" }
@@ -35,5 +36,20 @@ exports.getUserFromToken = async (token) => {
 exports.formatMessage = (username, text) => {
     return {
         username, text, time: moment.utc().format("hh:mm")
+    }
+}
+exports.appendUser = async (socketId, user) => {
+    user.set({ socketId });
+    await user.save();
+    users.push(user);
+    // console.log(users)
+    return users
+}
+
+exports.removeUser = (socketId) => {
+    const index = users.findIndex(user => user.id === id);
+
+    if (index !== -1) {
+        return users.splice(index, 1)[0];
     }
 }

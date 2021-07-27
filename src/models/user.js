@@ -35,7 +35,8 @@ const userSchema = new Schema(
             type: String,
             required: 'Your password is required',
             maxlength: 100,
-        }
+        },
+        socketId: String
     },
     { timestamps: true, bufferTimeoutMS: 30000 }
 );

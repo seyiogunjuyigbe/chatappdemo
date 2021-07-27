@@ -192,5 +192,5 @@ a {
 	font-style: italic;
 }
 .online-user{
-	cursor: pointer;
+	display: block;
 }
