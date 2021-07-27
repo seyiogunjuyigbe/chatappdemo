@@ -11,14 +11,19 @@ exports.generateRoom = async (req, res, next) => {
     try {
         let { users } = req.query;
         if (Array.isArray(users) && users.length > 1) {
-            let room = await Room.findOne({ users });
+            let userQ = users.map(u => {
+                return { users: u }
+            })
+            console.log(userQ)
+            let room = await Room.findOne({ $and: userQ });
+            console.log(room)
             if (!room) {
                 room = await Room.create({ users })
             }
             return res.redirect(`/chat/${room._id}`)
         }
         else {
-            return res.redirect("/")
+            return res.redirect("/chat")
         }
     } catch (error) {
         next(error)

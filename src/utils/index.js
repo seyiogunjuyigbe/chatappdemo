@@ -4,7 +4,7 @@ const createError = require('http-errors');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const moment = require('moment');
-const users = []
+var users = []
 exports.createDoc = async (model, payload) => {
     if (!Object.keys(Models).includes(model)) {
         return { success: false, error: "Invalid model selected" }
@@ -28,21 +28,38 @@ exports.get = async (model, options = {}, multiple = false, populate = "") => {
 }
 
 exports.getUserFromToken = async (token) => {
-    let decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-    let user = await User.findById({ _id: decodedToken.id });
-    if (!user) return { success: false, message: "User account not found" }
-    return { success: true, data: user }
+    try {
+        let dec = await jwt.verify(token, process.env.JWT_SECRET)
+        if (!dec) {
+            return { success: false, message: "token expired" }
+        }
+        var decodedToken = dec;
+        let user = await User.findById({ _id: decodedToken.id });
+        if (!user) return { success: false, message: "User account not found" }
+        return { success: true, data: user }
+    } catch (err) {
+        return { success: false, message: err }
+
+    }
+
+
 }
-exports.formatMessage = (username, text) => {
+exports.formatMessage = (username, text, time = "") => {
     return {
-        username, text, time: moment.utc().format("hh:mm")
+        username, text, time: time ? moment.utc(time).format("hh:mm") : moment.utc().format("hh:mm")
     }
 }
 exports.appendUser = async (socketId, user) => {
-    user.set({ socketId });
-    await user.save();
-    users.push(user);
-    // console.log(users)
+    if (!users.find(u => {
+        return String(u._id) === String(user._id)
+    })) {
+        user.set({ socketId });
+        await user.save();
+        users.push(user);
+    }
+    users = users.filter((value, index, self) => {
+        return self.indexOf(value) === index;
+    })
     return users
 }
 
@@ -52,4 +69,7 @@ exports.removeUser = (socketId) => {
     if (index !== -1) {
         return users.splice(index, 1)[0];
     }
+}
+exports.fetchUsers = () => {
+    return users
 }

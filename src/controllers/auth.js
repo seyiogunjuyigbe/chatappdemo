@@ -71,8 +71,10 @@ module.exports = {
     },
     async login(req, res, next) {
         try {
-            const { email, password } = req.body;
-            let user = await User.findOne({ email });
+            const { username, password } = req.body;
+            let user = await User.findOne({ username });
+            console.log(password, user)
+
             if (!user) {
                 return response(res, 401, 'login', { err: 'Invalid username or password' });
             }
@@ -80,7 +82,7 @@ module.exports = {
             if (!user.comparePassword(password)) {
                 return response(res, 401, 'login', { err: 'Invalid username or password' });
             }
-            let { firstName, lastName, id, username } = user;
+            let { firstName, lastName, id, email } = user;
             let token = generateToken({
                 id,
                 firstName,

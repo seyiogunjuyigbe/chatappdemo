@@ -2,7 +2,8 @@ const chatForm = document.querySelector('#chat-form');
 
 const socket = io(baseUrl);
 const chatMessages = document.querySelector('.chat-messages');
-let token = checkAuth()
+let token = checkAuth();
+console.log(token);
 socket.emit("send-token", token)
 const room = window.location.href.replace(window.location.origin + "/chat/", "");
 
@@ -10,18 +11,18 @@ var currentUser;
 var currentRoom;
 
 
-if (!currentRoom) {
-    chatMessages.style.display = "none"
 
-}
 socket.on('current-user', user => {
     currentUser = user
 })
 if (room && room.match(/^[a-f\d]{24}$/i)) {
     socket.emit("room-request", { user: currentUser, room })
 }
-socket.on('message', message => {
-    renderMessage(message);
+socket.on('message', messages => {
+    messages.forEach(message => {
+        renderMessage(message);
+    })
+
     chatMessages.scrollTop = chatMessages.scrollHeight
 });
 
@@ -30,6 +31,7 @@ socket.on('new-user', users => {
     updateOnlineUsers(users)
 })
 socket.on("no-auth", () => {
+    console.log("no auth");
     window.location.href = window.location.origin + "/auth/login"
 })
 socket.on('room-entered', (data) => {
@@ -40,8 +42,10 @@ socket.on('room-entered', (data) => {
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const msg = e.target.elements.msg.value;
-    let token = checkAuth()
-    socket.emit('chat-message', { message: msg, token });
+    let token = checkAuth();
+    console.log("sending");
+    console.log({ message: msg, token, room })
+    socket.emit('chat-message', { message: msg, token, room });
     e.target.elements.msg.value = "";
     e.target.elements.msg.focus()
 })
@@ -55,7 +59,6 @@ document.querySelectorAll('.online-user').forEach(user => {
     })
 })
 function renderMessage(msg) {
-    chatMessages.style.display = "block"
 
     let { text, username, time } = msg
     const div = document.createElement('div');
@@ -69,26 +72,33 @@ function renderMessage(msg) {
 }
 
 function updateOnlineUsers(users) {
-    console.log(users)
-    users.forEach(user => {
+    if (!currentUser) {
+        checkAuth()
+    }
+    if (users.length === 1 && users[0].username === currentUser.username) {
+        document.querySelector('#users').innerHTML = `<small style="font-style:italics;">You seem to be the only one here</small>`
+    } else {
+        document.querySelector('#users').innerHTML = ""
+        users.forEach(user => {
 
-        if (user.username !== currentUser.username) {
-            let li = document.createElement('a');
-            li.setAttribute('data-', user.username);
-            li.classList.add('online-user');
-            li.innerHTML = `${user.username}`
-            li.setAttribute('href', `/chat?users[]=${user._id}&users[]=${currentUser._id}`)
-            document.querySelector('#users').appendChild(li)
-        }
+            if (user.username !== currentUser.username) {
+                let list = document.createElement('li');
+                let li = document.createElement('a');
+                li.setAttribute('data-', user.username);
+                li.innerHTML = `${user.username.charAt(0).toUpperCase() + user.username.slice(1)}`
+                li.setAttribute('href', `/chat?users[]=${user._id}&users[]=${currentUser._id}`)
+                list.appendChild(li);
+                document.querySelector('#users').appendChild(list)
+            }
 
-    })
+        })
+    }
+
+
 }
 socket.on('online-users', onlineUsers => {
     if (onlineUsers) {
-        console.log(onlineUsers)
-        onlineUsers.forEach(user => {
-
-        })
+        updateOnlineUsers(onlineUsers)
     }
 })
 
@@ -96,7 +106,6 @@ function openRoom(usernames = []) {
     socket.emit('room-request', usernames)
 }
 function renderRoomMessages(messages = []) {
-    chatMessages.style.display = "block"
 
     chatMessages.innerHTML = "";
     messages.forEach(message => {

@@ -187,10 +187,7 @@ a {
 		display: none;
 	}
 }
-.disabled{
-	color: grey;
-	font-style: italic;
-}
-.online-user{
-	display: block;
+
+li a{
+	color : #fff;
 }

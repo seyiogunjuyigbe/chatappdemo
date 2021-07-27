@@ -26,17 +26,19 @@ app.use(errorHandler);
 
 io.on('connection', socket => {
     // Welcome current user
-    socket.emit('message', 'Welcome');
     // broadcasr when user connects
-    socket.broadcast.emit('message', "A user has just joined the chat");
+    // socket.broadcast.emit('message', "A user has just joined the chat");
+
+
     socket.on('chat-message', async (payload) => {
         try {
-            const { message, room } = payload;
-            let userData = await Utils.get({ socketId: socket.id });
+            const { message, room, token } = payload;
+
+            let userData = await Utils.getUserFromToken(token);
             if (!userData.data) {
-                throw new Error("User not found")
+                socket.emit("no-auth")
             }
-            let user = userData.data
+            let user = userData.data;
             let newMsg = {
                 sender: user._id,
                 text: message,
@@ -44,10 +46,14 @@ io.on('connection', socket => {
             }
             let msg = await Utils.createDoc("message", newMsg);
             if (!msg.data) {
-                throw new Error("An error occured sending your message")
-
+                console.log('message not sent')
+                socket.emit("no-auth")
             }
-            io.to(room).emit('message', Utils.formatMessage(user.username, msg.data.text));
+            let allMsgs = await Utils.get("message", { room }, true, "sender");
+            let msgs = allMsgs.data ? allMsgs.data.map(m => {
+                return Utils.formatMessage(m.sender.username, m.text, m.createdAt)
+            }) : []
+            io.emit('message', msgs);
         } catch (err) {
             // socket.emit("no-auth")
             console.log(err)
@@ -57,6 +63,7 @@ io.on('connection', socket => {
     socket.on('send-token', async token => {
         try {
             let user = await Utils.getUserFromToken(token);
+            console.log(user)
             if (!user.data) {
                 socket.emit("no-auth")
             }
@@ -66,7 +73,7 @@ io.on('connection', socket => {
             socket.emit('new-user', users)
         } catch (error) {
             console.log(error)
-            socket.emit("no-auth")
+            // socket.emit("no-auth")
 
         }
 
@@ -74,17 +81,15 @@ io.on('connection', socket => {
     })
     socket.on('room-request', async (user, room) => {
         try {
-            await Utils.appendUser(socket.id, user);
-            socket.join(room._id)
-            let messages = await Utils.get("message", { room: room._id }, true, "sender");
+            console.log("gere")
+            socket.join(room)
+            let messages = await Utils.get("message", { room }, true, "sender");
             let parsedMessages = messages.data ? messages.data.map(m => {
                 return { text: m.text, username: m.sender.username, time: moment.utc(m.createdAt).format("hh:mm") }
             }) : []
-            io.to(room._id).emit('online-users', {
-                users,
-                room, messages: parsedMessages
-            })
-            // socket.emit('room-entered', { room, messages: parsedMessages })
+            let users = Utils.fetchUsers()
+            io.emit('online-users', users);
+            io.emit("message", parsedMessages)
 
         } catch (error) {
             console.log(error)
